@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { notFound } from 'next/navigation';
+import StateChanger from './state-changer';
 
 export const dynamic = 'force-dynamic';
 
@@ -163,9 +164,7 @@ export default async function WorkItemDetailPage({
             )}
           </div>
         </div>
-        <span className={`rounded-full px-3 py-1 text-sm font-medium ${stateColors[item.state] || ''}`}>
-          {item.state.replace(/_/g, ' ')}
-        </span>
+        <StateChanger itemId={item.id} currentState={item.state} />
       </div>
 
       {/* Progress Bar */}
