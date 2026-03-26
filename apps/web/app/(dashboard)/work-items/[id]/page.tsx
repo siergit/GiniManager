@@ -7,6 +7,7 @@ import ChecklistSection from './checklist-section';
 import InlineEdit from './inline-edit';
 import DependenciesSection from './dependencies-section';
 import DeleteButton from './delete-button';
+import DuplicateButton from './duplicate-button';
 import QuickTimeLog from './quick-time-log';
 import TimeEntriesSection from './time-entries-section';
 import PriorityChanger from './priority-changer';
@@ -411,7 +412,8 @@ export default async function WorkItemDetailPage({
           <span>Updated: {new Date(item.updated_at).toLocaleString('pt-PT')}</span>
           <span>ID: {item.id}</span>
         </div>
-        <div className="mt-2">
+        <div className="mt-2 flex gap-4">
+          <DuplicateButton itemId={item.id} />
           <DeleteButton itemId={item.id} itemTitle={item.title} />
         </div>
       </div>

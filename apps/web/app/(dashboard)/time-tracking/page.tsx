@@ -73,6 +73,9 @@ export default async function TimeTrackingPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Time Tracking</h1>
         <p className="mt-1 text-sm text-gray-500">Track time on work items</p>
+        <Link href="/time-tracking/approvals" className="mt-2 inline-block text-sm text-blue-600 hover:underline">
+          Aprovação de horas →
+        </Link>
       </div>
 
       {/* Stats */}

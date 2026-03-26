@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { createAdminClient } from '@/lib/supabase-admin';
 
 export const dynamic = 'force-dynamic';
@@ -101,6 +102,9 @@ export default async function ReportsPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
         <p className="mt-1 text-sm text-gray-500">Last 30 days overview</p>
+        <Link href="/reports/weekly" className="mt-2 inline-flex items-center gap-1 text-sm text-blue-600 hover:underline">
+          Ver relatório semanal →
+        </Link>
       </div>
 
       {/* Summary Cards */}
