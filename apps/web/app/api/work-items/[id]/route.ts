@@ -69,6 +69,17 @@ export async function PATCH(
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+    // Log to audit
+    if (data) {
+      await supabase.from('audit_log').insert({
+        action: 'update',
+        entity_type: 'work_item',
+        entity_id: id,
+        old_values: null,
+        new_values: updates,
+      });
+    }
+
   return NextResponse.json({ data });
 }
 

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 import { createAdminClient } from '@/lib/supabase-admin';
 import WorkItemFilters from './filters';
+import SelectableList from './selectable-list';
 
 export const dynamic = 'force-dynamic';
 
@@ -122,30 +123,7 @@ export default async function WorkItemsPage({
 
       {/* Show flat filtered results if filtering */}
       {(params.search || params.state || params.priority || params.type || params.assignee) && (
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
-            <h2 className="text-sm font-medium text-gray-700">
-              {filteredItems.length} results {params.search && `for "${params.search}"`}
-            </h2>
-          </div>
-          <div className="divide-y divide-gray-50">
-            {filteredItems.map(item => (
-              <Link key={item.id} href={`/work-items/${item.id}`} className="flex items-center gap-3 px-4 py-2.5 hover:bg-blue-50 transition-colors">
-                <span>{priorityIcons[item.priority] || '⚪'}</span>
-                <span className="flex-1 text-sm font-medium text-gray-900 truncate">{item.title}</span>
-                <span className={`rounded px-1.5 py-0.5 text-xs font-medium text-white ${typeColors[item.item_type] || 'bg-gray-500'}`}>
-                  {typeLabels[item.item_type]}
-                </span>
-                <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${stateColors[item.state] || 'bg-gray-100 text-gray-700'}`}>
-                  {item.state.replace(/_/g, ' ')}
-                </span>
-              </Link>
-            ))}
-            {filteredItems.length === 0 && (
-              <div className="px-4 py-8 text-center text-sm text-gray-400">No items match your filters</div>
-            )}
-          </div>
-        </div>
+        <SelectableList items={filteredItems} searchTerm={params.search} />
       )}
 
       {!params.search && !params.state && !params.priority && !params.type && !params.assignee && (

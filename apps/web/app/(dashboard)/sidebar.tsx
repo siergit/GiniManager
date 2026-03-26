@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useTheme } from './theme-provider';
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: '📊' },
@@ -20,6 +21,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
+  const { theme, toggle } = useTheme();
 
   function isActive(href: string) {
     if (href === '/') return pathname === '/';
@@ -59,6 +61,13 @@ export default function Sidebar() {
           ))}
         </nav>
         <div className="border-t border-gray-200 p-4">
+          <button
+            onClick={toggle}
+            className="w-full mb-3 flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          >
+            <span>{theme === 'light' ? '🌙' : '☀️'}</span>
+            {theme === 'light' ? 'Modo escuro' : 'Modo claro'}
+          </button>
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
               A
