@@ -10,6 +10,7 @@ const navItems = [
   { href: '/time-tracking', label: 'Time Tracking', icon: '⏱️' },
   { href: '/team', label: 'Team', icon: '👥' },
   { href: '/reports', label: 'Reports', icon: '📈' },
+  { href: '/notifications', label: 'Notifications', icon: '🔔' },
   { href: '/settings', label: 'Settings', icon: '⚙️' },
 ];
 
