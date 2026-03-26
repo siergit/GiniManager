@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '_SiEr_2026';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '._SiEr_2026';
 
 export async function POST(request: Request) {
   try {
