@@ -1,102 +1,114 @@
-const stats = [
-  { label: 'Total Work Items', value: '0', change: 'No data yet', color: 'blue' },
-  { label: 'In Progress', value: '0', change: 'No active items', color: 'yellow' },
-  { label: 'Blocked', value: '0', change: 'No blockers', color: 'red' },
-  { label: 'Done This Week', value: '0', change: 'No completions', color: 'green' },
-];
+import { createAdminClient } from '@/lib/supabase-admin';
 
-const recentActivity = [
-  { action: 'System initialized', detail: 'GiniManager project created', time: 'Just now' },
-  { action: 'Database ready', detail: '21 tables with RLS policies', time: 'Just now' },
-  { action: 'ClickUp data mapped', detail: '5 team members, 3 areas, ~300 tasks', time: 'Pending import' },
-];
+export const dynamic = 'force-dynamic';
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const supabase = createAdminClient();
+
+  const { data: items } = await supabase
+    .from('work_items')
+    .select('state, priority, item_type');
+
+  const { data: users } = await supabase
+    .from('users')
+    .select('id, full_name, email, role')
+    .eq('is_active', true)
+    .order('full_name');
+
+  const total = items?.length || 0;
+  const inProgress = items?.filter(i => i.state === 'in_progress').length || 0;
+  const blocked = items?.filter(i => i.state === 'blocked').length || 0;
+  const done = items?.filter(i => i.state === 'done').length || 0;
+  const backlog = items?.filter(i => i.state === 'backlog').length || 0;
+
+  const stats = [
+    { label: 'Total Work Items', value: total.toString(), detail: `${items?.filter(i => i.item_type === 'task').length || 0} tasks` },
+    { label: 'In Progress', value: inProgress.toString(), detail: `${backlog} in backlog` },
+    { label: 'Blocked', value: blocked.toString(), detail: blocked === 0 ? 'No blockers' : 'Needs attention' },
+    { label: 'Done', value: done.toString(), detail: `${total > 0 ? Math.round(done / total * 100) : 0}% complete` },
+  ];
+
+  const roleLabels: Record<string, string> = {
+    admin: 'Admin',
+    manager: 'Manager',
+    collaborator: 'Collaborator',
+  };
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="mt-1 text-sm text-gray-500">Management overview</p>
+        <p className="mt-1 text-sm text-gray-500">Management overview - live data from Supabase</p>
       </div>
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm"
-          >
+          <div key={stat.label} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
             <p className="text-sm font-medium text-gray-500">{stat.label}</p>
             <p className="mt-2 text-3xl font-bold text-gray-900">{stat.value}</p>
-            <p className="mt-1 text-xs text-gray-400">{stat.change}</p>
+            <p className="mt-1 text-xs text-gray-400">{stat.detail}</p>
           </div>
         ))}
       </div>
 
-      {/* Two Column Layout */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Recent Activity */}
+        {/* Items by Type */}
         <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
-          <div className="mt-4 space-y-4">
-            {recentActivity.map((item, i) => (
-              <div key={i} className="flex items-start gap-3">
-                <div className="mt-1 h-2 w-2 rounded-full bg-blue-500 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-medium text-gray-900">{item.action}</p>
-                  <p className="text-xs text-gray-500">{item.detail}</p>
+          <h2 className="text-lg font-semibold text-gray-900">Items by Type</h2>
+          <div className="mt-4 space-y-3">
+            {['area', 'project', 'delivery', 'task', 'subtask'].map((type) => {
+              const count = items?.filter(i => i.item_type === type).length || 0;
+              if (count === 0) return null;
+              return (
+                <div key={type} className="flex items-center justify-between">
+                  <span className="text-sm text-gray-700 capitalize">{type}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-32 h-2 rounded-full bg-gray-200 overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-blue-500"
+                        style={{ width: `${total > 0 ? (count / total) * 100 : 0}%` }}
+                      />
+                    </div>
+                    <span className="text-sm font-medium text-gray-900 w-8 text-right">{count}</span>
+                  </div>
                 </div>
-                <span className="ml-auto text-xs text-gray-400 whitespace-nowrap">{item.time}</span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
-        {/* Team Overview */}
+        {/* Team */}
         <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900">Team</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Team ({users?.length || 0})</h2>
           <div className="mt-4 space-y-3">
-            {[
-              { name: 'Daniel Viana', role: 'SW/Electronics', email: 'daniel.viana@sier.pt' },
-              { name: 'Rafael Ribeiro', role: 'CNC/Mechanics', email: 'rafael.ribeiro@sier.pt' },
-              { name: 'Miguel Reis', role: 'Software', email: 'miguel.reis@sier.pt' },
-              { name: 'Andre Barbosa', role: 'CAD/Design Lead', email: 'andre.barbosa@sier.pt' },
-              { name: 'Pedro Moreira', role: 'Electronics/HW', email: 'pedro.moreira@sier.pt' },
-            ].map((member) => (
-              <div key={member.email} className="flex items-center gap-3 rounded-lg p-2 hover:bg-gray-50">
+            {users?.filter(u => u.email !== 'admin@sier.pt').map((member) => (
+              <div key={member.id} className="flex items-center gap-3 rounded-lg p-2 hover:bg-gray-50">
                 <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-600">
-                  {member.name.split(' ').map(n => n[0]).join('')}
+                  {member.full_name.split(' ').map((n: string) => n[0]).join('')}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900 truncate">{member.name}</p>
-                  <p className="text-xs text-gray-500">{member.role}</p>
+                  <p className="text-sm font-medium text-gray-900 truncate">{member.full_name}</p>
+                  <p className="text-xs text-gray-500">{member.email}</p>
                 </div>
+                <span className="text-xs rounded-full bg-gray-100 px-2 py-1 text-gray-600">
+                  {roleLabels[member.role] || member.role}
+                </span>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Quick Actions */}
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-semibold text-gray-900">Quick Actions</h2>
         <div className="mt-4 flex flex-wrap gap-3">
-          <a
-            href="/work-items/new"
-            className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors"
-          >
+          <a href="/work-items/new" className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
             + New Work Item
           </a>
-          <a
-            href="/work-items"
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-          >
+          <a href="/work-items" className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
             View All Items
           </a>
-          <a
-            href="/time-tracking"
-            className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-          >
+          <a href="/time-tracking" className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
             Time Tracking
           </a>
         </div>

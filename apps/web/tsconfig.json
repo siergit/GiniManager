@@ -6,7 +6,7 @@
     "moduleResolution": "bundler",
     "allowJs": true,
     "paths": {
-      "@/*": ["./app/*", "./components/*", "./lib/*"]
+      "@/*": ["./*"]
     },
     "plugins": [{ "name": "next" }]
   },
