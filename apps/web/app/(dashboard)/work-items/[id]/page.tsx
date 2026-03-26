@@ -12,6 +12,8 @@ import TimeEntriesSection from './time-entries-section';
 import PriorityChanger from './priority-changer';
 import TitleEdit from './title-edit';
 import DescriptionEdit from './description-edit';
+import ReorderButtons from './reorder-buttons';
+import TagsEditor from './tags-editor';
 
 export const dynamic = 'force-dynamic';
 
@@ -189,6 +191,7 @@ export default async function WorkItemDetailPage({
               <span className={`rounded px-2 py-0.5 text-xs font-bold text-white ${typeColors[item.item_type] || 'bg-gray-500'}`}>
                 {item.item_type.toUpperCase()}
               </span>
+              <TagsEditor itemId={id} tags={item.tags || []} />
             </div>
             <DescriptionEdit itemId={id} description={item.description} />
           </div>
@@ -303,6 +306,7 @@ export default async function WorkItemDetailPage({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 text-left text-xs text-gray-500 uppercase tracking-wide">
+                  <th className="px-2 py-3 font-medium w-12"></th>
                   <th className="px-4 py-3 font-medium">Title</th>
                   <th className="px-4 py-3 font-medium w-20">Type</th>
                   <th className="px-4 py-3 font-medium w-28">State</th>
@@ -314,8 +318,11 @@ export default async function WorkItemDetailPage({
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {children?.map((child: { id: string; title: string; item_type: string; state: string; priority: string; progress_pct: number; estimated_minutes: number; actual_minutes: number; assignee: { full_name: string } | null }) => (
+                {children?.map((child: { id: string; title: string; item_type: string; state: string; priority: string; progress_pct: number; estimated_minutes: number; actual_minutes: number; assignee: { full_name: string } | null }, index: number) => (
                   <tr key={child.id} className="hover:bg-blue-50 transition-colors">
+                    <td className="px-2 py-3">
+                      <ReorderButtons itemId={child.id} currentOrder={index} siblingCount={children?.length || 0} />
+                    </td>
                     <td className="px-4 py-3">
                       <Link href={`/work-items/${child.id}`} className="font-medium text-gray-900 hover:text-blue-600">
                         {child.title}

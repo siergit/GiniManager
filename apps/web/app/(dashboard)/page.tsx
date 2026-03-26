@@ -15,6 +15,65 @@ export default async function DashboardPage() {
     .eq('is_active', true)
     .order('full_name');
 
+  // Recent activity (last 10 state changes + comments + time entries)
+  const { data: recentStateChanges } = await supabase
+    .from('work_item_state_log')
+    .select('*, work_item:work_items!work_item_state_log_work_item_id_fkey(id, title), user:users!work_item_state_log_changed_by_fkey(full_name)')
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  const { data: recentComments } = await supabase
+    .from('comments')
+    .select('*, work_item:work_items!comments_work_item_id_fkey(id, title), user:users!comments_user_id_fkey(full_name)')
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  const { data: recentTimeEntries } = await supabase
+    .from('time_entries')
+    .select('*, work_item:work_items(id, title), user:users!time_entries_user_id_fkey(full_name)')
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  // Merge and sort
+  type Activity = { type: string; title: string; detail: string; time: string; link?: string };
+  const activities: Activity[] = [];
+
+  recentStateChanges?.forEach(s => {
+    activities.push({
+      type: '🔄',
+      title: `${s.user?.full_name || 'Someone'} changed state`,
+      detail: `${s.work_item?.title || 'Item'}: ${s.from_state || '?'} → ${s.to_state}`,
+      time: s.created_at,
+      link: s.work_item?.id ? `/work-items/${s.work_item.id}` : undefined,
+    });
+  });
+
+  recentComments?.forEach(c => {
+    activities.push({
+      type: '💬',
+      title: `${c.user?.full_name || 'Someone'} commented`,
+      detail: `on ${c.work_item?.title || 'Item'}: "${c.body?.substring(0, 50)}${c.body?.length > 50 ? '...' : ''}"`,
+      time: c.created_at,
+      link: c.work_item?.id ? `/work-items/${c.work_item.id}` : undefined,
+    });
+  });
+
+  recentTimeEntries?.forEach(t => {
+    const h = Math.floor(t.minutes / 60);
+    const m = t.minutes % 60;
+    const dur = h > 0 ? `${h}h${m > 0 ? ` ${m}m` : ''}` : `${m}m`;
+    activities.push({
+      type: '⏱️',
+      title: `${t.user?.full_name || 'Someone'} logged ${dur}`,
+      detail: `on ${t.work_item?.title || 'Item'}`,
+      time: t.created_at,
+      link: t.work_item?.id ? `/work-items/${t.work_item.id}` : undefined,
+    });
+  });
+
+  activities.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+  const topActivities = activities.slice(0, 10);
+
   const total = items?.length || 0;
   const inProgress = items?.filter(i => i.state === 'in_progress').length || 0;
   const blocked = items?.filter(i => i.state === 'blocked').length || 0;
@@ -52,28 +111,28 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Items by Type */}
+        {/* Recent Activity */}
         <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900">Items by Type</h2>
+          <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
           <div className="mt-4 space-y-3">
-            {['area', 'project', 'delivery', 'task', 'subtask'].map((type) => {
-              const count = items?.filter(i => i.item_type === type).length || 0;
-              if (count === 0) return null;
-              return (
-                <div key={type} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-700 capitalize">{type}</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-32 h-2 rounded-full bg-gray-200 overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-blue-500"
-                        style={{ width: `${total > 0 ? (count / total) * 100 : 0}%` }}
-                      />
-                    </div>
-                    <span className="text-sm font-medium text-gray-900 w-8 text-right">{count}</span>
-                  </div>
+            {topActivities.length > 0 ? topActivities.map((act, i) => (
+              <div key={i} className="flex items-start gap-3">
+                <span className="text-base mt-0.5">{act.type}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-900">{act.title}</p>
+                  {act.link ? (
+                    <a href={act.link} className="text-xs text-blue-600 hover:underline truncate block">{act.detail}</a>
+                  ) : (
+                    <p className="text-xs text-gray-500 truncate">{act.detail}</p>
+                  )}
                 </div>
-              );
-            })}
+                <span className="text-xs text-gray-400 whitespace-nowrap">
+                  {new Date(act.time).toLocaleString('pt-PT', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
+            )) : (
+              <p className="text-sm text-gray-400">No recent activity. Start by changing states, logging time, or adding comments.</p>
+            )}
           </div>
         </div>
 
