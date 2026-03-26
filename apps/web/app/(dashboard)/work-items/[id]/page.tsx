@@ -9,6 +9,9 @@ import DependenciesSection from './dependencies-section';
 import DeleteButton from './delete-button';
 import QuickTimeLog from './quick-time-log';
 import TimeEntriesSection from './time-entries-section';
+import PriorityChanger from './priority-changer';
+import TitleEdit from './title-edit';
+import DescriptionEdit from './description-edit';
 
 export const dynamic = 'force-dynamic';
 
@@ -179,17 +182,15 @@ export default async function WorkItemDetailPage({
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-2xl">{priorityIcons[item.priority] || '⚪'}</span>
+          <PriorityChanger itemId={id} currentPriority={item.priority} />
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold text-gray-900">{item.title}</h1>
+              <TitleEdit itemId={id} title={item.title} />
               <span className={`rounded px-2 py-0.5 text-xs font-bold text-white ${typeColors[item.item_type] || 'bg-gray-500'}`}>
                 {item.item_type.toUpperCase()}
               </span>
             </div>
-            {item.description && (
-              <p className="mt-1 text-sm text-gray-600">{item.description}</p>
-            )}
+            <DescriptionEdit itemId={id} description={item.description} />
           </div>
         </div>
         <StateChanger itemId={item.id} currentState={item.state} />
