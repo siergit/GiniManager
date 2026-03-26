@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import StateChanger from './state-changer';
 import CommentsSection from './comments-section';
 import ChecklistSection from './checklist-section';
+import InlineEdit from './inline-edit';
 
 export const dynamic = 'force-dynamic';
 
@@ -118,6 +119,14 @@ export default async function WorkItemDetailPage({
     .eq('work_item_id', id)
     .order('sort_order');
 
+  // Fetch all active users (for assignee dropdown)
+  const { data: allUsers } = await supabase
+    .from('users')
+    .select('id, full_name')
+    .eq('is_active', true)
+    .neq('email', 'admin@sier.pt')
+    .order('full_name');
+
   // Fetch comments
   const { data: comments } = await supabase
     .from('comments')
@@ -192,17 +201,28 @@ export default async function WorkItemDetailPage({
         )}
       </div>
 
-      {/* Info Grid */}
+      {/* Info Grid - Editable */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Assignee</p>
-          <p className="mt-1 text-sm font-medium text-gray-900">
-            {item.assignee?.full_name || 'Unassigned'}
-          </p>
+          <InlineEdit
+            itemId={id}
+            field="assignee_id"
+            value={item.assignee_id}
+            type="select"
+            options={(allUsers || []).map((u: { id: string; full_name: string }) => ({ value: u.id, label: u.full_name }))}
+            label="Assignee"
+            displayValue={item.assignee?.full_name || 'Unassigned'}
+          />
         </div>
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Estimated</p>
-          <p className="mt-1 text-sm font-medium text-gray-900">{formatMinutes(item.estimated_minutes || 0)}</p>
+          <InlineEdit
+            itemId={id}
+            field="estimated_minutes"
+            value={item.estimated_minutes || 0}
+            type="number"
+            label="Estimated (min)"
+            displayValue={formatMinutes(item.estimated_minutes || 0)}
+          />
         </div>
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
           <p className="text-xs text-gray-500 uppercase tracking-wide">Actual</p>
@@ -213,12 +233,10 @@ export default async function WorkItemDetailPage({
           <p className="mt-1 text-sm font-medium text-gray-900">{formatMinutes(item.remaining_minutes || 0)}</p>
         </div>
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Start Date</p>
-          <p className="mt-1 text-sm font-medium text-gray-900">{formatDate(item.start_date)}</p>
+          <InlineEdit itemId={id} field="start_date" value={item.start_date} type="date" label="Start Date" displayValue={formatDate(item.start_date)} />
         </div>
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Due Date</p>
-          <p className="mt-1 text-sm font-medium text-gray-900">{formatDate(item.due_date)}</p>
+          <InlineEdit itemId={id} field="due_date" value={item.due_date} type="date" label="Due Date" displayValue={formatDate(item.due_date)} />
         </div>
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
           <p className="text-xs text-gray-500 uppercase tracking-wide">Actual Start</p>
