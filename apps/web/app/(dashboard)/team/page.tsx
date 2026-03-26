@@ -32,6 +32,21 @@ export default async function TeamPage() {
     .select('user_id, minutes')
     .gte('date', weekAgo.toISOString().split('T')[0]);
 
+  const { data: capacities } = await supabase
+    .from('capacity_profiles')
+    .select('user_id, capacity_type, allocation_pct, weekly_minutes')
+    .is('effective_to', null);
+
+  const capacityMap: Record<string, { type: string; allocation: number; weeklyHours: number }> = {};
+  capacities?.forEach(c => {
+    const weeklyMin = Object.values(c.weekly_minutes as Record<string, number>).reduce((s, v) => s + v, 0);
+    capacityMap[c.user_id] = {
+      type: c.capacity_type,
+      allocation: c.allocation_pct,
+      weeklyHours: Math.round((weeklyMin * c.allocation_pct / 100) / 60),
+    };
+  });
+
   const userStats: Record<string, { assigned: number; inProgress: number; done: number; weekMinutes: number }> = {};
   assignments?.forEach(a => {
     if (!a.assignee_id) return;
@@ -96,6 +111,17 @@ export default async function TeamPage() {
                   <p className="text-xs text-gray-500">Week</p>
                 </div>
               </div>
+
+              {capacityMap[user.id] && (
+                <div className="mt-3 flex items-center gap-2 text-xs text-gray-500">
+                  <span className={`rounded px-1.5 py-0.5 font-medium ${capacityMap[user.id].type === 'full_time' ? 'bg-green-50 text-green-700' : 'bg-yellow-50 text-yellow-700'}`}>
+                    {capacityMap[user.id].type === 'full_time' ? 'Full-time' : 'Part-time'}
+                  </span>
+                  <span>{capacityMap[user.id].allocation}% allocation</span>
+                  <span>·</span>
+                  <span>{capacityMap[user.id].weeklyHours}h/week capacity</span>
+                </div>
+              )}
 
               <div className="mt-3 text-xs text-gray-400">
                 <span>Timezone: {user.timezone}</span>

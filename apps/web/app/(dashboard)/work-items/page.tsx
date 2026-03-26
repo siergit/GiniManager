@@ -104,9 +104,14 @@ export default async function WorkItemsPage({
             {items.length} items total — {totalsByType['area'] || 0} areas, {totalsByType['project'] || 0} projects, {totalsByType['delivery'] || 0} deliveries, {totalsByType['task'] || 0} tasks
           </p>
         </div>
-        <Link href="/work-items/new" className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
-          + New Item
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/work-items/kanban" className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+            Kanban
+          </Link>
+          <Link href="/work-items/new" className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors">
+            + New Item
+          </Link>
+        </div>
       </div>
 
       <Suspense fallback={null}>

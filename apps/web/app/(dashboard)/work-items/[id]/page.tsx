@@ -8,6 +8,7 @@ import InlineEdit from './inline-edit';
 import DependenciesSection from './dependencies-section';
 import DeleteButton from './delete-button';
 import QuickTimeLog from './quick-time-log';
+import TimeEntriesSection from './time-entries-section';
 
 export const dynamic = 'force-dynamic';
 
@@ -211,6 +212,8 @@ export default async function WorkItemDetailPage({
       </div>
 
       <QuickTimeLog workItemId={id} users={(allUsers || []) as { id: string; full_name: string }[]} />
+
+      <TimeEntriesSection workItemId={id} />
 
       {/* Info Grid - Editable */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
