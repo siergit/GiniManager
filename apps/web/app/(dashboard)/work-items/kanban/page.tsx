@@ -28,7 +28,7 @@ export default async function KanbanPage() {
 
   const { data: items } = await supabase
     .from('work_items')
-    .select('id, title, item_type, state, priority, assignee_id, estimated_minutes, actual_minutes')
+    .select('id, title, item_type, state, priority, assignee_id, estimated_minutes, actual_minutes, due_date')
     .in('item_type', ['task', 'subtask', 'delivery'])
     .order('priority')
     .order('created_at');
@@ -86,6 +86,17 @@ export default async function KanbanPage() {
                         {item.assignee_id && (
                           <span className="text-xs text-gray-500">{userMap[item.assignee_id] || ''}</span>
                         )}
+                        {item.due_date && (() => {
+                          const today = new Date().toISOString().split('T')[0];
+                          const isOverdue = item.due_date < today;
+                          const isThisWeek = !isOverdue && item.due_date <= new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+                          return (
+                            <span className={`text-xs ${isOverdue ? 'text-red-600 font-medium' : isThisWeek ? 'text-amber-600' : 'text-gray-400'}`}>
+                              {isOverdue ? '⚠️ ' : ''}
+                              {new Date(item.due_date).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' })}
+                            </span>
+                          );
+                        })()}
                         {item.estimated_minutes > 0 && (
                           <span className="ml-auto text-xs text-gray-400">
                             {Math.floor(item.estimated_minutes / 60)}h

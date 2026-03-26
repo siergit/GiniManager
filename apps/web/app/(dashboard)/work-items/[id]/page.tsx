@@ -295,12 +295,14 @@ export default async function WorkItemDetailPage({
       )}
 
       {/* Children Table */}
-      {childrenCount > 0 && (
-        <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-          <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
+      <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
             <h2 className="text-base font-semibold text-gray-900">
               Children ({childrenCount})
             </h2>
+            <Link href={`/work-items/new?parent=${id}`} className="text-xs text-blue-600 hover:text-blue-800">
+              + Add child
+            </Link>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -356,7 +358,6 @@ export default async function WorkItemDetailPage({
             </table>
           </div>
         </div>
-      )}
 
       {/* Checklist */}
       <ChecklistSection workItemId={id} items={checklist || []} />

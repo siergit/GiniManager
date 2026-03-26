@@ -10,9 +10,10 @@ const typeLabels: Record<string, string> = {
 interface Props {
   parentItems: { id: string; title: string; item_type: string; depth: number }[];
   users: { id: string; full_name: string; email: string }[];
+  defaultParentId?: string;
 }
 
-export default function CreateWorkItemForm({ parentItems, users }: Props) {
+export default function CreateWorkItemForm({ parentItems, users, defaultParentId }: Props) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -78,7 +79,7 @@ export default function CreateWorkItemForm({ parentItems, users }: Props) {
 
       <div>
         <label htmlFor="parent_id" className="block text-sm font-medium text-gray-700">Parent Item</label>
-        <select id="parent_id" name="parent_id" className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2.5">
+        <select id="parent_id" name="parent_id" defaultValue={defaultParentId || ''} className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2.5">
           <option value="">None (top-level area)</option>
           {parentItems.map((p) => (
             <option key={p.id} value={p.id}>

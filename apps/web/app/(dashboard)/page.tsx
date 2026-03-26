@@ -7,7 +7,7 @@ export default async function DashboardPage() {
 
   const { data: items } = await supabase
     .from('work_items')
-    .select('state, priority, item_type');
+    .select('id, title, state, priority, item_type, due_date, assignee_id');
 
   const { data: users } = await supabase
     .from('users')
@@ -74,6 +74,20 @@ export default async function DashboardPage() {
   activities.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
   const topActivities = activities.slice(0, 10);
 
+  // Overdue and upcoming deadlines
+  const today = new Date().toISOString().split('T')[0];
+  const nextWeek = new Date();
+  nextWeek.setDate(nextWeek.getDate() + 7);
+  const nextWeekStr = nextWeek.toISOString().split('T')[0];
+
+  const overdueItems = items?.filter(i =>
+    i.due_date && i.due_date < today && !['done', 'cancelled', 'archived'].includes(i.state)
+  ) || [];
+
+  const upcomingItems = items?.filter(i =>
+    i.due_date && i.due_date >= today && i.due_date <= nextWeekStr && !['done', 'cancelled', 'archived'].includes(i.state)
+  ) || [];
+
   const total = items?.length || 0;
   const inProgress = items?.filter(i => i.state === 'in_progress').length || 0;
   const blocked = items?.filter(i => i.state === 'blocked').length || 0;
@@ -109,6 +123,42 @@ export default async function DashboardPage() {
           </div>
         ))}
       </div>
+
+      {/* Overdue & Upcoming Deadlines */}
+      {(overdueItems.length > 0 || upcomingItems.length > 0) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {overdueItems.length > 0 && (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4">
+              <h3 className="text-sm font-semibold text-red-800">🔴 Overdue ({overdueItems.length})</h3>
+              <div className="mt-2 space-y-1.5">
+                {overdueItems.slice(0, 5).map(item => (
+                  <a key={item.id} href={`/work-items/${item.id}`} className="flex items-center justify-between text-sm hover:bg-red-100 rounded px-2 py-1 -mx-2">
+                    <span className="text-red-900 truncate">{item.title}</span>
+                    <span className="text-xs text-red-600 whitespace-nowrap ml-2">
+                      due {new Date(item.due_date).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' })}
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+          {upcomingItems.length > 0 && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+              <h3 className="text-sm font-semibold text-amber-800">⚠️ Due This Week ({upcomingItems.length})</h3>
+              <div className="mt-2 space-y-1.5">
+                {upcomingItems.slice(0, 5).map(item => (
+                  <a key={item.id} href={`/work-items/${item.id}`} className="flex items-center justify-between text-sm hover:bg-amber-100 rounded px-2 py-1 -mx-2">
+                    <span className="text-amber-900 truncate">{item.title}</span>
+                    <span className="text-xs text-amber-600 whitespace-nowrap ml-2">
+                      due {new Date(item.due_date).toLocaleDateString('pt-PT', { day: '2-digit', month: 'short' })}
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Recent Activity */}

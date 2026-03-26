@@ -3,7 +3,12 @@ import CreateWorkItemForm from './create-form';
 
 export const dynamic = 'force-dynamic';
 
-export default async function NewWorkItemPage() {
+export default async function NewWorkItemPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ parent?: string }>;
+}) {
+  const params = await searchParams;
   const supabase = createAdminClient();
 
   const { data: parentItems } = await supabase
@@ -26,7 +31,7 @@ export default async function NewWorkItemPage() {
         <h1 className="text-2xl font-bold text-gray-900">New Work Item</h1>
         <p className="mt-1 text-sm text-gray-500">Create a new area, project, delivery, task, or subtask</p>
       </div>
-      <CreateWorkItemForm parentItems={parentItems || []} users={users || []} />
+      <CreateWorkItemForm parentItems={parentItems || []} users={users || []} defaultParentId={params.parent} />
     </div>
   );
 }
