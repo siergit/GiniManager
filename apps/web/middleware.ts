@@ -16,15 +16,22 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check for session cookie (Supabase auth)
-  const supabaseAuth = request.cookies.get('sb-regmnsqlanryicspccnn-auth-token');
-  if (!supabaseAuth) {
-    const loginUrl = new URL('/login', request.url);
-    loginUrl.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(loginUrl);
+  // Check for admin session cookie
+  const adminSession = request.cookies.get('gini-admin-session');
+  if (adminSession?.value === 'admin') {
+    return NextResponse.next();
   }
 
-  return NextResponse.next();
+  // Check for Supabase auth session cookie
+  const supabaseAuth = request.cookies.get('sb-regmnsqlanryicspccnn-auth-token');
+  if (supabaseAuth) {
+    return NextResponse.next();
+  }
+
+  // Not authenticated - redirect to login
+  const loginUrl = new URL('/login', request.url);
+  loginUrl.searchParams.set('redirect', pathname);
+  return NextResponse.redirect(loginUrl);
 }
 
 export const config = {
