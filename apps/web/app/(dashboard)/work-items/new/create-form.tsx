@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Templates from './templates';
 
 const typeLabels: Record<string, string> = {
   area: 'Area', project: 'Project', delivery: 'Delivery', task: 'Task', subtask: 'Subtask',
@@ -66,6 +67,20 @@ export default function CreateWorkItemForm({ parentItems, users, defaultParentId
   }
 
   return (
+    <>
+    <Templates onSelect={(t) => {
+      const form = document.querySelector('form');
+      if (form) {
+        const titleInput = form.querySelector('#title') as HTMLInputElement;
+        if (titleInput && t.title) titleInput.value = t.title as string;
+        const typeSelect = form.querySelector('#item_type') as HTMLSelectElement;
+        if (typeSelect && t.item_type) typeSelect.value = t.item_type as string;
+        const prioritySelect = form.querySelector('#priority') as HTMLSelectElement;
+        if (prioritySelect && t.priority) prioritySelect.value = t.priority as string;
+        const estInput = form.querySelector('#estimated_hours') as HTMLInputElement;
+        if (estInput && t.estimated_hours) estInput.value = t.estimated_hours as string;
+      }
+    }} />
     <form onSubmit={handleSubmit} className="space-y-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <div>
         <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title *</label>
@@ -152,5 +167,6 @@ export default function CreateWorkItemForm({ parentItems, users, defaultParentId
         </button>
       </div>
     </form>
+    </>
   );
 }
