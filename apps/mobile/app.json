@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "GiniManager",
+    "slug": "ginimanager",
+    "version": "0.0.1",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "ginimanager",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "pt.sier.ginimanager"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#ffffff"
+      },
+      "package": "pt.sier.ginimanager"
+    },
+    "plugins": ["expo-router", "expo-secure-store"]
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "@gini/mobile",
+  "version": "0.0.1",
+  "private": true,
+  "main": "expo-router/entry",
+  "scripts": {
+    "dev": "expo start",
+    "build:android": "eas build --platform android",
+    "build:ios": "eas build --platform ios",
+    "lint": "expo lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "expo": "~52.0.0",
+    "expo-router": "~4.0.0",
+    "expo-status-bar": "~2.0.0",
+    "expo-secure-store": "~14.0.0",
+    "react": "^19.0.0",
+    "react-native": "~0.77.0",
+    "react-native-safe-area-context": "~5.0.0",
+    "react-native-screens": "~4.4.0",
+    "@supabase/supabase-js": "^2.49.0",
+    "@gini/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "typescript": "^5.7.0"
+  }
+}
