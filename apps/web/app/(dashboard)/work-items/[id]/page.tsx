@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { createAdminClient } from '@/lib/supabase-admin';
 import { notFound } from 'next/navigation';
 import StateChanger from './state-changer';
+import CommentsSection from './comments-section';
+import ChecklistSection from './checklist-section';
 
 export const dynamic = 'force-dynamic';
 
@@ -115,6 +117,13 @@ export default async function WorkItemDetailPage({
     .select('*')
     .eq('work_item_id', id)
     .order('sort_order');
+
+  // Fetch comments
+  const { data: comments } = await supabase
+    .from('comments')
+    .select('*, user:users!comments_user_id_fkey(id, full_name)')
+    .eq('work_item_id', id)
+    .order('created_at', { ascending: true });
 
   // Calculate children stats
   const childrenCount = children?.length || 0;
@@ -310,25 +319,10 @@ export default async function WorkItemDetailPage({
       )}
 
       {/* Checklist */}
-      {checklist && checklist.length > 0 && (
-        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-gray-900">
-            Checklist ({checklist.filter((c: { is_completed: boolean }) => c.is_completed).length}/{checklist.length})
-          </h2>
-          <div className="mt-3 space-y-2">
-            {checklist.map((item: { id: string; title: string; is_completed: boolean }) => (
-              <div key={item.id} className="flex items-center gap-3">
-                <div className={`h-5 w-5 rounded border-2 flex items-center justify-center ${item.is_completed ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300'}`}>
-                  {item.is_completed && <span className="text-xs">✓</span>}
-                </div>
-                <span className={`text-sm ${item.is_completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>
-                  {item.title}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      <ChecklistSection workItemId={id} items={checklist || []} />
+
+      {/* Comments */}
+      <CommentsSection workItemId={id} comments={comments || []} />
 
       {/* Logbook */}
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
