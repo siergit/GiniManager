@@ -4,17 +4,18 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useTheme } from './theme-provider';
+import { useLocale } from './locale-provider';
 
 const navItems = [
-  { href: '/', label: 'Dashboard', icon: '📊' },
-  { href: '/my-work', label: 'Visão Pessoa', icon: '👤' },
-  { href: '/work-items', label: 'Work Items', icon: '📋' },
-  { href: '/time-tracking', label: 'Time Tracking', icon: '⏱️' },
-  { href: '/team', label: 'Team', icon: '👥' },
-  { href: '/capacity', label: 'Calendário', icon: '📅' },
-  { href: '/reports', label: 'Reports', icon: '📈' },
-  { href: '/notifications', label: 'Notifications', icon: '🔔' },
-  { href: '/settings', label: 'Settings', icon: '⚙️' },
+  { href: '/', labelKey: 'nav.dashboard' as const, icon: '📊' },
+  { href: '/my-work', labelKey: 'nav.myWork' as const, icon: '👤' },
+  { href: '/work-items', labelKey: 'nav.workItems' as const, icon: '📋' },
+  { href: '/time-tracking', labelKey: 'nav.timeTracking' as const, icon: '⏱️' },
+  { href: '/team', labelKey: 'nav.team' as const, icon: '👥' },
+  { href: '/capacity', labelKey: 'nav.calendar' as const, icon: '📅' },
+  { href: '/reports', labelKey: 'nav.reports' as const, icon: '📈' },
+  { href: '/notifications', labelKey: 'nav.notifications' as const, icon: '🔔' },
+  { href: '/settings', labelKey: 'nav.settings' as const, icon: '⚙️' },
 ];
 
 export default function Sidebar() {
@@ -22,6 +23,7 @@ export default function Sidebar() {
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
   const { theme, toggle } = useTheme();
+  const { t } = useLocale();
 
   function isActive(href: string) {
     if (href === '/') return pathname === '/';
@@ -56,7 +58,7 @@ export default function Sidebar() {
               }`}
             >
               <span className="text-lg">{item.icon}</span>
-              {item.label}
+              {t(item.labelKey)}
             </Link>
           ))}
         </nav>
@@ -66,7 +68,7 @@ export default function Sidebar() {
             className="w-full mb-3 flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             <span>{theme === 'light' ? '🌙' : '☀️'}</span>
-            {theme === 'light' ? 'Modo escuro' : 'Modo claro'}
+            {theme === 'light' ? t('common.darkMode') : t('common.lightMode')}
           </button>
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
@@ -82,7 +84,7 @@ export default function Sidebar() {
               className="text-xs text-gray-400 hover:text-red-600 transition-colors"
               title="Logout"
             >
-              {loggingOut ? '...' : '↪ Sair'}
+              {loggingOut ? '...' : `↪ ${t('common.logout')}`}
             </button>
           </div>
         </div>

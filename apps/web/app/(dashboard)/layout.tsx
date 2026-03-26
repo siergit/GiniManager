@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import Sidebar from './sidebar';
 import MobileHeader from './mobile-header';
 import { ThemeProvider } from './theme-provider';
+import { LocaleProvider } from './locale-provider';
 
 export default async function DashboardLayout({
   children,
@@ -18,6 +19,7 @@ export default async function DashboardLayout({
 
   return (
     <ThemeProvider>
+    <LocaleProvider>
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
@@ -30,6 +32,7 @@ export default async function DashboardLayout({
         </main>
       </div>
     </div>
+    </LocaleProvider>
     </ThemeProvider>
   );
 }

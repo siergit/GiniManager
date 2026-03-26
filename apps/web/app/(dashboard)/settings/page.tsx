@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase-admin';
 import Link from 'next/link';
+import LanguageSwitcher from './language-switcher';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,6 +31,9 @@ export default async function SettingsPage() {
         <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
         <p className="mt-1 text-sm text-gray-500">Application configuration and system info</p>
       </div>
+
+      {/* Language */}
+      <LanguageSwitcher />
 
       {/* System Info */}
       <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
