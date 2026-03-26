@@ -46,6 +46,19 @@ export async function POST(request: Request) {
   const userId = body.user_id || adminUser?.id;
   if (!userId) return NextResponse.json({ error: 'No user found' }, { status: 400 });
 
+  // Check if work item has subtasks - if so, block time logging
+  const { count: childCount } = await supabase
+    .from('work_items')
+    .select('*', { count: 'exact', head: true })
+    .eq('parent_id', body.work_item_id);
+
+  if (childCount && childCount > 0) {
+    return NextResponse.json(
+      { error: 'Não é possível registar tempo em tarefas com subtarefas. Registe tempo nas subtarefas individuais.' },
+      { status: 400 }
+    );
+  }
+
   const { data, error } = await supabase
     .from('time_entries')
     .insert({

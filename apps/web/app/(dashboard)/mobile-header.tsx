@@ -6,9 +6,11 @@ import { usePathname, useRouter } from 'next/navigation';
 
 const navItems = [
   { href: '/', label: 'Dashboard', icon: '📊' },
+  { href: '/my-work', label: 'Visão Pessoa', icon: '👤' },
   { href: '/work-items', label: 'Work Items', icon: '📋' },
   { href: '/time-tracking', label: 'Time', icon: '⏱️' },
   { href: '/team', label: 'Team', icon: '👥' },
+  { href: '/capacity', label: 'Calendário', icon: '📅' },
   { href: '/reports', label: 'Reports', icon: '📈' },
   { href: '/notifications', label: 'Alerts', icon: '🔔' },
   { href: '/settings', label: 'Settings', icon: '⚙️' },
