@@ -47,7 +47,7 @@ function progressColor(pct: number): string {
 export default async function WorkItemsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ search?: string; state?: string; priority?: string; type?: string }>;
+  searchParams: Promise<{ search?: string; state?: string; priority?: string; type?: string; assignee?: string }>;
 }) {
   const supabase = createAdminClient();
   const params = await searchParams;
@@ -67,6 +67,8 @@ export default async function WorkItemsPage({
     if (params.state && i.state !== params.state) return false;
     if (params.priority && i.priority !== params.priority) return false;
     if (params.type && i.item_type !== params.type) return false;
+    if (params.assignee === 'unassigned' && i.assignee_id) return false;
+    if (params.assignee && params.assignee !== 'unassigned' && i.assignee_id !== params.assignee) return false;
     return true;
   });
 
@@ -119,7 +121,7 @@ export default async function WorkItemsPage({
       </Suspense>
 
       {/* Show flat filtered results if filtering */}
-      {(params.search || params.state || params.priority || params.type) && (
+      {(params.search || params.state || params.priority || params.type || params.assignee) && (
         <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
             <h2 className="text-sm font-medium text-gray-700">
@@ -146,7 +148,7 @@ export default async function WorkItemsPage({
         </div>
       )}
 
-      {!params.search && !params.state && !params.priority && !params.type && (
+      {!params.search && !params.state && !params.priority && !params.type && !params.assignee && (
       <div className="space-y-4">
         {areas.map((area) => {
           const areaChildren = getChildren(area.id);

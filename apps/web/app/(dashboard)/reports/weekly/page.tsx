@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase-admin';
 import Link from 'next/link';
+import ExportCSV from '../export-csv';
 
 export const dynamic = 'force-dynamic';
 
@@ -81,7 +82,10 @@ export default async function WeeklyReportPage() {
             Semana de {new Date(weekStart + 'T00:00:00').toLocaleDateString('pt-PT', { day: '2-digit', month: 'long' })} a {new Date(weekEnd + 'T00:00:00').toLocaleDateString('pt-PT', { day: '2-digit', month: 'long', year: 'numeric' })}
           </p>
         </div>
-        <Link href="/reports" className="text-sm text-blue-600 hover:underline">← Relatórios gerais</Link>
+        <div className="flex items-center gap-3">
+          <Link href="/reports" className="text-sm text-blue-600 hover:underline">← Relatórios gerais</Link>
+          <ExportCSV endpoint="/api/reports/weekly-summary" filename="weekly-report" />
+        </div>
       </div>
 
       {/* Team Summary */}

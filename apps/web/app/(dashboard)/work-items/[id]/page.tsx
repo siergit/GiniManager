@@ -6,6 +6,7 @@ import CommentsSection from './comments-section';
 import ChecklistSection from './checklist-section';
 import InlineEdit from './inline-edit';
 import DependenciesSection from './dependencies-section';
+import AttachmentsSection from './attachments-section';
 import DeleteButton from './delete-button';
 import DuplicateButton from './duplicate-button';
 import QuickTimeLog from './quick-time-log';
@@ -365,6 +366,9 @@ export default async function WorkItemDetailPage({
 
       {/* Dependencies */}
       <DependenciesSection workItemId={id} allItems={allWorkItems || []} />
+
+      {/* Attachments */}
+      <AttachmentsSection workItemId={id} />
 
       {/* Comments */}
       <CommentsSection workItemId={id} comments={comments || []} />
