@@ -5,6 +5,8 @@ import StateChanger from './state-changer';
 import CommentsSection from './comments-section';
 import ChecklistSection from './checklist-section';
 import InlineEdit from './inline-edit';
+import DependenciesSection from './dependencies-section';
+import DeleteButton from './delete-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -126,6 +128,12 @@ export default async function WorkItemDetailPage({
     .eq('is_active', true)
     .neq('email', 'admin@sier.pt')
     .order('full_name');
+
+  // Fetch all work items (for dependency selector)
+  const { data: allWorkItems } = await supabase
+    .from('work_items')
+    .select('id, title, item_type')
+    .order('title');
 
   // Fetch comments
   const { data: comments } = await supabase
@@ -339,6 +347,9 @@ export default async function WorkItemDetailPage({
       {/* Checklist */}
       <ChecklistSection workItemId={id} items={checklist || []} />
 
+      {/* Dependencies */}
+      <DependenciesSection workItemId={id} allItems={allWorkItems || []} />
+
       {/* Comments */}
       <CommentsSection workItemId={id} comments={comments || []} />
 
@@ -384,6 +395,9 @@ export default async function WorkItemDetailPage({
           <span>Created: {new Date(item.created_at).toLocaleString('pt-PT')}</span>
           <span>Updated: {new Date(item.updated_at).toLocaleString('pt-PT')}</span>
           <span>ID: {item.id}</span>
+        </div>
+        <div className="mt-2">
+          <DeleteButton itemId={item.id} itemTitle={item.title} />
         </div>
       </div>
     </div>
