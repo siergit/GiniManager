@@ -87,21 +87,30 @@ export default function MyTaskList({ userId, tasks }: { userId: string; tasks: T
     return () => clearInterval(i);
   }, [timerStart]);
 
+  const [error, setError] = useState('');
+
   async function startTimer(taskId: string) {
     setLoading(taskId);
+    setError('');
     try {
       const res = await fetch('/api/timer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ user_id: userId, work_item_id: taskId }),
       });
+      const data = await res.json();
       if (res.ok) {
-        const data = await res.json();
         setActiveTimerTaskId(taskId);
         setTimerStart(new Date(data.timer.timer_started_at).getTime());
         setShowStopFor(null);
         router.refresh();
+      } else {
+        setError(data.error || 'Erro ao iniciar timer');
+        setTimeout(() => setError(''), 5000);
       }
+    } catch (err) {
+      setError('Erro de rede');
+      setTimeout(() => setError(''), 5000);
     } finally {
       setLoading(null);
     }
@@ -123,7 +132,7 @@ export default function MyTaskList({ userId, tasks }: { userId: string; tasks: T
 
   const today = new Date().toISOString().split('T')[0];
 
-  if (tasks.length === 0) {
+  if (tasks.length === 0 && !error) {
     return (
       <div className="px-4 py-6 text-center text-sm text-gray-400">
         Sem tarefas atribuídas
@@ -133,6 +142,11 @@ export default function MyTaskList({ userId, tasks }: { userId: string; tasks: T
 
   return (
     <div className="divide-y divide-gray-50">
+      {error && (
+        <div className="px-4 py-2 bg-red-50 text-sm text-red-700 border-b border-red-100">
+          {error}
+        </div>
+      )}
       {tasks.map(task => {
         const isActive = activeTimerTaskId === task.id;
         const isOverdue = task.due_date && task.due_date < today;
