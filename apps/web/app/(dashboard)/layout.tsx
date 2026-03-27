@@ -17,10 +17,9 @@ export default async function DashboardLayout({
 }) {
   const cookieStore = await cookies();
   const adminSession = cookieStore.get('gini-admin-session');
+  const pinSession = cookieStore.get('gini-session');
 
-  const otpSession = cookieStore.get('sb-session-token');
-
-  if ((!adminSession || adminSession.value !== 'admin') && !otpSession) {
+  if (!adminSession?.value && !pinSession?.value) {
     redirect('/login');
   }
 

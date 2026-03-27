@@ -16,6 +16,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Check for PIN session cookie
+  const pinSession = request.cookies.get('gini-session');
+  if (pinSession) {
+    return NextResponse.next();
+  }
+
   // Check for admin session cookie
   const adminSession = request.cookies.get('gini-admin-session');
   if (adminSession?.value === 'admin') {

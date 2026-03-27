@@ -6,32 +6,31 @@ import { useRouter } from 'next/navigation';
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
+  const [pin, setPin] = useState('');
   const [loading, setLoading] = useState(false);
-  const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
   const [showAdmin, setShowAdmin] = useState(false);
   const [adminPass, setAdminPass] = useState('');
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handlePinLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('/api/auth/pin-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, pin }),
       });
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || 'Login failed');
-      }
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Login falhou');
 
-      setSent(true);
+      router.push('/');
+      router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
       setLoading(false);
     }
@@ -51,112 +50,115 @@ export default function LoginPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Invalid password');
+        throw new Error(data.error || 'Password inválida');
       }
 
       router.push('/');
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      setError(err instanceof Error ? err.message : 'Erro desconhecido');
     } finally {
       setLoading(false);
     }
   }
 
-  if (sent) {
-    return (
-      <main className="flex min-h-screen items-center justify-center p-8">
-        <div className="w-full max-w-sm text-center">
-          <h1 className="text-2xl font-bold">Verifica o teu email</h1>
-          <p className="mt-4 text-gray-600">
-            Enviámos um link de login para <strong>{email}</strong>
-          </p>
-          <p className="mt-2 text-sm text-gray-400">
-            Clica no link no email para entrar. Também podes usar o código de 6 dígitos abaixo.
-          </p>
-          <a href="/verify-otp" className="mt-4 inline-block rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-            Inserir código manualmente
-          </a>
-        </div>
-      </main>
-    );
-  }
-
   return (
-    <main className="flex min-h-screen items-center justify-center p-8">
+    <main className="flex min-h-screen items-center justify-center p-8 bg-gray-50">
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-center">GiniManager</h1>
-        <p className="mt-2 text-center text-gray-600">Sign in to your account</p>
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-bold">
+            <span className="text-blue-600">Gini</span>Manager
+          </h1>
+          <p className="mt-2 text-gray-500">Gestão Operacional de Equipas</p>
+        </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+        {/* PIN Login */}
+        <form onSubmit={handlePinLogin} className="space-y-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
             <input
               id="email"
               type="email"
               required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@sier.pt"
+              onChange={e => setEmail(e.target.value)}
+              placeholder="nome@sier.pt"
               className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-blue-500 focus:ring-blue-500"
             />
           </div>
 
-          {error && !showAdmin && (
-            <p className="text-sm text-red-600">{error}</p>
-          )}
+          <div>
+            <label htmlFor="pin" className="block text-sm font-medium text-gray-700">PIN (8 dígitos)</label>
+            <input
+              id="pin"
+              type="password"
+              inputMode="numeric"
+              pattern="[0-9]{8}"
+              maxLength={8}
+              required
+              value={pin}
+              onChange={e => {
+                const v = e.target.value.replace(/\D/g, '').slice(0, 8);
+                setPin(v);
+              }}
+              placeholder="••••••••"
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-3 text-center text-xl tracking-[0.5em] font-mono focus:border-blue-500 focus:ring-blue-500"
+            />
+            <div className="mt-2 flex justify-center gap-1">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className={`h-2 w-2 rounded-full ${i < pin.length ? 'bg-blue-600' : 'bg-gray-200'}`} />
+              ))}
+            </div>
+          </div>
+
+          {error && !showAdmin && <p className="text-sm text-red-600">{error}</p>}
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || pin.length !== 8}
             className="w-full rounded-lg bg-blue-600 px-4 py-3 text-white font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
           >
-            {loading && !showAdmin ? 'Sending...' : 'Send login code'}
+            {loading && !showAdmin ? 'A entrar...' : 'Entrar'}
           </button>
         </form>
 
-        <div className="mt-6 border-t border-gray-200 pt-6">
+        {/* Admin Login */}
+        <div className="mt-4">
           {!showAdmin ? (
             <button
               onClick={() => setShowAdmin(true)}
-              className="w-full rounded-lg border-2 border-gray-800 bg-gray-900 px-4 py-3 text-white font-medium hover:bg-gray-800 transition-colors"
+              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-500 hover:bg-gray-50 transition-colors"
             >
-              Admin Login
+              Administrador
             </button>
           ) : (
-            <form onSubmit={handleAdminLogin} className="space-y-3">
-              <div>
-                <label htmlFor="admin-pass" className="block text-sm font-medium text-gray-700">
-                  Admin Password
-                </label>
-                <input
-                  id="admin-pass"
-                  type="password"
-                  required
-                  value={adminPass}
-                  onChange={(e) => setAdminPass(e.target.value)}
-                  placeholder="Enter admin password"
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-gray-500 focus:ring-gray-500"
-                  autoFocus
-                />
+            <form onSubmit={handleAdminLogin} className="space-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+              <input
+                type="password"
+                required
+                value={adminPass}
+                onChange={e => setAdminPass(e.target.value)}
+                placeholder="Password de administrador"
+                className="block w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:border-gray-500 focus:ring-gray-500"
+                autoFocus
+              />
+              {error && showAdmin && <p className="text-sm text-red-600">{error}</p>}
+              <div className="flex gap-2">
+                <button type="submit" disabled={loading} className="flex-1 rounded-lg bg-gray-900 px-4 py-2.5 text-sm text-white disabled:opacity-50">
+                  {loading ? '...' : 'Entrar como Admin'}
+                </button>
+                <button type="button" onClick={() => setShowAdmin(false)} className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm text-gray-500">
+                  ✕
+                </button>
               </div>
-
-              {error && showAdmin && (
-                <p className="text-sm text-red-600">{error}</p>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full rounded-lg bg-gray-900 px-4 py-3 text-white font-medium hover:bg-gray-800 disabled:opacity-50 transition-colors"
-              >
-                {loading ? 'Logging in...' : 'Login as Admin'}
-              </button>
             </form>
           )}
         </div>
+
+        <p className="mt-6 text-center text-xs text-gray-400">
+          O PIN é fornecido pelo administrador.<br />
+          Contacta o teu gestor se não tens PIN.
+        </p>
       </div>
     </main>
   );
