@@ -18,7 +18,7 @@ const navItems = [
   { href: '/settings', labelKey: 'nav.settings' as const, icon: '⚙️' },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ userName, userEmail, userRole }: { userName: string; userEmail: string; userRole: string }) {
   const pathname = usePathname();
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
@@ -81,11 +81,11 @@ export default function Sidebar() {
           </button>
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
-              A
+              {userName.split(' ').map(n => n[0]).join('').slice(0, 2)}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900">Admin</p>
-              <p className="text-xs text-gray-500">SIER</p>
+              <p className="text-sm font-medium text-gray-900">{userName}</p>
+              <p className="text-xs text-gray-500">{userRole === 'admin' ? 'Admin' : userRole === 'manager' ? 'Manager' : 'Colaborador'}</p>
             </div>
             <button
               onClick={handleLogout}

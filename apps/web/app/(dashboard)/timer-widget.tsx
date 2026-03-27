@@ -26,18 +26,37 @@ export default function TimerWidget() {
 
   // Load users and saved preference
   useEffect(() => {
-    fetch('/api/users')
-      .then(r => r.json())
-      .then(d => {
-        const userList = (d.data || []).filter((u: User & { email: string }) => u.email !== 'admin@sier.pt');
-        setUsers(userList);
-        const saved = localStorage.getItem('gini-timer-user');
-        if (saved && userList.find((u: User) => u.id === saved)) {
-          setSelectedUserId(saved);
-        } else if (userList.length > 0) {
-          setSelectedUserId(userList[0].id);
+    async function loadUsers() {
+      const res = await fetch('/api/users');
+      const d = await res.json();
+      const userList = (d.data || []).filter((u: User & { email: string }) => u.email !== 'admin@sier.pt');
+      setUsers(userList);
+
+      const saved = localStorage.getItem('gini-timer-user');
+      if (saved && userList.find((u: User) => u.id === saved)) {
+        setSelectedUserId(saved);
+        return;
+      }
+
+      // Auto-select from session
+      try {
+        const sessionRes = await fetch('/api/auth/session');
+        const sessionData = await sessionRes.json();
+        if (sessionData.user?.userId) {
+          const match = userList.find((u: User) => u.id === sessionData.user.userId);
+          if (match) {
+            setSelectedUserId(match.id);
+            localStorage.setItem('gini-timer-user', match.id);
+            return;
+          }
         }
-      });
+      } catch { /* ignore */ }
+
+      if (userList.length > 0) {
+        setSelectedUserId(userList[0].id);
+      }
+    }
+    loadUsers();
   }, []);
 
   function changeUser(id: string) {
