@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { createAdminClient } from '@/lib/supabase-admin';
+import KanbanPlayButton from './kanban-play-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -105,6 +106,9 @@ export default async function KanbanPage() {
                             {Math.floor(item.estimated_minutes / 60)}h
                           </span>
                         )}
+                      </div>
+                      <div className="mt-2 flex justify-end">
+                        <KanbanPlayButton workItemId={item.id} workItemTitle={item.title} />
                       </div>
                       {(item.estimated_minutes > 0 || item.actual_minutes > 0) && (
                         <div className="mt-2 flex items-center gap-1.5">

@@ -20,6 +20,7 @@ import PrintButton from './print-button';
 import QuickSubtask from './quick-subtask';
 import MoveItem from './move-item';
 import ArchiveButton from './archive-button';
+import PlayButton from '@/components/play-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -221,7 +222,10 @@ export default async function WorkItemDetailPage({
         )}
       </div>
 
-      <QuickTimeLog workItemId={id} users={(allUsers || []) as { id: string; full_name: string }[]} />
+      <div className="flex items-center gap-3">
+        <PlayButton workItemId={id} workItemTitle={item.title} size="md" showLabel />
+        <QuickTimeLog workItemId={id} users={(allUsers || []) as { id: string; full_name: string }[]} />
+      </div>
 
       <TimeEntriesSection workItemId={id} />
 
