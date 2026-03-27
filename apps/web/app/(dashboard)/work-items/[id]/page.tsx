@@ -16,6 +16,7 @@ import TitleEdit from './title-edit';
 import DescriptionEdit from './description-edit';
 import ReorderButtons from './reorder-buttons';
 import TagsEditor from './tags-editor';
+import PrintButton from './print-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -419,6 +420,7 @@ export default async function WorkItemDetailPage({
         <div className="mt-2 flex gap-4">
           <DuplicateButton itemId={item.id} />
           <DeleteButton itemId={item.id} itemTitle={item.title} />
+          <PrintButton />
         </div>
       </div>
     </div>

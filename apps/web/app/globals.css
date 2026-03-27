@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+@media print {
+  nav, aside, header, button, form, input, select,
+  .no-print { display: none !important; }
+  main { padding: 0 !important; }
+  .print-only { display: block !important; }
+  * { color-adjust: exact; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

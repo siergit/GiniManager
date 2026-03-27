@@ -5,6 +5,8 @@ import MobileHeader from './mobile-header';
 import GlobalSearch from './global-search';
 import { ThemeProvider } from './theme-provider';
 import { LocaleProvider } from './locale-provider';
+import KeyboardShortcuts from './keyboard-shortcuts';
+import QuickNav from './quick-nav';
 
 export default async function DashboardLayout({
   children,
@@ -30,10 +32,12 @@ export default async function DashboardLayout({
           <span className="ml-auto text-sm text-gray-500 dark:text-gray-400">SIER - UnikRobotics / MACH4</span>
         </header>
         <main className="flex-1 overflow-y-auto p-4 md:p-6 dark:bg-gray-900">
+          <QuickNav />
           {children}
         </main>
       </div>
     </div>
+      <KeyboardShortcuts />
     </LocaleProvider>
     </ThemeProvider>
   );

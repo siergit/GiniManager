@@ -62,6 +62,15 @@ export default function Sidebar() {
             </Link>
           ))}
         </nav>
+        <div className="px-3 pb-2">
+          <button
+            onClick={() => document.getElementById('shortcuts-modal')?.classList.toggle('hidden')}
+            className="w-full flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          >
+            <kbd className="rounded bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 text-[10px] font-mono border border-gray-200 dark:border-gray-600">?</kbd>
+            Atalhos de teclado
+          </button>
+        </div>
         <div className="border-t border-gray-200 p-4">
           <button
             onClick={toggle}
