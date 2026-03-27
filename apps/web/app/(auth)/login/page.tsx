@@ -67,12 +67,15 @@ export default function LoginPage() {
     return (
       <main className="flex min-h-screen items-center justify-center p-8">
         <div className="w-full max-w-sm text-center">
-          <h1 className="text-2xl font-bold">Check your email</h1>
+          <h1 className="text-2xl font-bold">Verifica o teu email</h1>
           <p className="mt-4 text-gray-600">
-            We sent a login code to <strong>{email}</strong>
+            Enviámos um link de login para <strong>{email}</strong>
           </p>
-          <a href="/verify-otp" className="mt-6 inline-block text-blue-600 hover:underline">
-            Enter code
+          <p className="mt-2 text-sm text-gray-400">
+            Clica no link no email para entrar. Também podes usar o código de 6 dígitos abaixo.
+          </p>
+          <a href="/verify-otp" className="mt-4 inline-block rounded-lg border border-gray-300 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+            Inserir código manualmente
           </a>
         </div>
       </main>
