@@ -52,6 +52,9 @@ export default async function KanbanPage() {
           <Link href="/work-items" className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
             List View
           </Link>
+          <Link href="/work-items/gantt" className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
+            Gantt
+          </Link>
           <Link href="/work-items/new" className="rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700">
             + New
           </Link>
