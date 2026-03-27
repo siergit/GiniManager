@@ -1,7 +1,7 @@
 export const pt = {
   // Navigation
   'nav.dashboard': 'Painel',
-  'nav.myWork': 'Visao Pessoa',
+  'nav.myWork': 'Painel Pessoal',
   'nav.workItems': 'Itens de Trabalho',
   'nav.timeTracking': 'Registo de Tempo',
   'nav.team': 'Equipa',

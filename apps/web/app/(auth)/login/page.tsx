@@ -50,7 +50,9 @@ export default function LoginPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Código inválido');
 
-      router.push('/');
+      // Redirect based on role: collaborator goes to my-work, admin/manager to dashboard
+      const role = data.user?.role || 'collaborator';
+      router.push(role === 'collaborator' ? '/my-work' : '/');
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro');
