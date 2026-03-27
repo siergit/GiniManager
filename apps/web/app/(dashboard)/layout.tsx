@@ -7,6 +7,7 @@ import { ThemeProvider } from './theme-provider';
 import { LocaleProvider } from './locale-provider';
 import KeyboardShortcuts from './keyboard-shortcuts';
 import QuickNav from './quick-nav';
+import RealtimeProvider from './realtime-provider';
 
 export default async function DashboardLayout({
   children,
@@ -16,7 +17,9 @@ export default async function DashboardLayout({
   const cookieStore = await cookies();
   const adminSession = cookieStore.get('gini-admin-session');
 
-  if (!adminSession || adminSession.value !== 'admin') {
+  const otpSession = cookieStore.get('sb-session-token');
+
+  if ((!adminSession || adminSession.value !== 'admin') && !otpSession) {
     redirect('/login');
   }
 
@@ -37,6 +40,7 @@ export default async function DashboardLayout({
         </main>
       </div>
     </div>
+      <RealtimeProvider />
       <KeyboardShortcuts />
     </LocaleProvider>
     </ThemeProvider>

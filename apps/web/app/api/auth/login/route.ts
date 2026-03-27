@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        shouldCreateUser: false, // Only existing users
+        shouldCreateUser: true, // Allow team members to sign up via OTP
       },
     });
 

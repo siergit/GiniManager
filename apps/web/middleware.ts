@@ -22,6 +22,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Check for Supabase OTP session
+  const otpSession = request.cookies.get('sb-session-token');
+  if (otpSession) {
+    return NextResponse.next();
+  }
+
   // Check for Supabase auth session cookie
   const supabaseAuth = request.cookies.get('sb-regmnsqlanryicspccnn-auth-token');
   if (supabaseAuth) {
