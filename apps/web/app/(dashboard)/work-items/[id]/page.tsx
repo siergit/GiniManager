@@ -17,6 +17,7 @@ import DescriptionEdit from './description-edit';
 import ReorderButtons from './reorder-buttons';
 import TagsEditor from './tags-editor';
 import PrintButton from './print-button';
+import QuickSubtask from './quick-subtask';
 
 export const dynamic = 'force-dynamic';
 
@@ -359,6 +360,9 @@ export default async function WorkItemDetailPage({
                 ))}
               </tbody>
             </table>
+          </div>
+          <div className="p-3 border-t border-gray-100">
+            <QuickSubtask parentId={id} parentType={item.item_type} users={(allUsers || []) as { id: string; full_name: string }[]} />
           </div>
         </div>
 

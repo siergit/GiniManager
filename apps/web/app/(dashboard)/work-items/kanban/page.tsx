@@ -103,6 +103,25 @@ export default async function KanbanPage() {
                           </span>
                         )}
                       </div>
+                      {(item.estimated_minutes > 0 || item.actual_minutes > 0) && (
+                        <div className="mt-2 flex items-center gap-1.5">
+                          <div className="flex-1 h-1 rounded-full bg-gray-200 overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${
+                                item.estimated_minutes > 0 && item.actual_minutes > item.estimated_minutes
+                                  ? 'bg-red-500'
+                                  : item.estimated_minutes > 0 && item.actual_minutes / item.estimated_minutes >= 0.75
+                                  ? 'bg-green-500'
+                                  : 'bg-blue-400'
+                              }`}
+                              style={{ width: `${item.estimated_minutes > 0 ? Math.min(100, (item.actual_minutes / item.estimated_minutes) * 100) : 0}%` }}
+                            />
+                          </div>
+                          <span className="text-[10px] text-gray-400">
+                            {Math.floor(item.actual_minutes / 60)}h/{Math.floor(item.estimated_minutes / 60)}h
+                          </span>
+                        </div>
+                      )}
                     </Link>
                   ))}
                   {colItems.length === 0 && (
