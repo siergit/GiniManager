@@ -78,8 +78,8 @@ export default function VerifyOtpPage() {
               required
               value={token}
               onChange={e => setToken(e.target.value)}
-              placeholder="123456"
-              maxLength={6}
+              placeholder="12345678"
+              maxLength={8}
               className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-3 text-center text-2xl tracking-widest focus:border-blue-500 focus:ring-blue-500"
               autoFocus
             />

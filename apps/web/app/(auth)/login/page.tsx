@@ -122,7 +122,7 @@ export default function LoginPage() {
             </button>
 
             <p className="text-xs text-gray-400 text-center">
-              Receberás um código de 6 dígitos no teu email
+              Receberás um código de 8 dígitos no teu email
             </p>
           </form>
         )}
@@ -140,19 +140,19 @@ export default function LoginPage() {
                 id="code"
                 type="text"
                 inputMode="numeric"
-                maxLength={6}
+                maxLength={8}
                 required
                 value={code}
                 onChange={e => {
-                  const v = e.target.value.replace(/\D/g, '').slice(0, 6);
+                  const v = e.target.value.replace(/\D/g, '').slice(0, 8);
                   setCode(v);
                 }}
-                placeholder="000000"
+                placeholder="00000000"
                 className="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-3 text-center text-2xl tracking-[0.5em] font-mono focus:border-blue-500 focus:ring-blue-500"
                 autoFocus
               />
               <div className="mt-2 flex justify-center gap-1.5">
-                {Array.from({ length: 6 }).map((_, i) => (
+                {Array.from({ length: 8 }).map((_, i) => (
                   <div key={i} className={`h-2 w-2 rounded-full transition-colors ${i < code.length ? 'bg-blue-600' : 'bg-gray-200'}`} />
                 ))}
               </div>
@@ -162,7 +162,7 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              disabled={loading || code.length !== 6}
+              disabled={loading || code.length !== 8}
               className="w-full rounded-lg bg-blue-600 px-4 py-3 text-white font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
               {loading ? 'A verificar...' : 'Entrar'}
