@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { createAdminClient } from '@/lib/supabase-admin';
+import { getSession } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,8 @@ function formatMinutes(min: number): string {
 
 export default async function MyWorkPage() {
   const supabase = createAdminClient();
+  const session = await getSession();
+  const currentUserId = session?.userId;
 
   const { data: users } = await supabase
     .from('users')
@@ -117,7 +120,11 @@ export default async function MyWorkPage() {
 
       {/* Per-person cards */}
       <div className="space-y-6">
-        {users?.map(user => {
+        {[...(users || [])].sort((a, b) => {
+          if (a.id === currentUserId) return -1;
+          if (b.id === currentUserId) return 1;
+          return 0;
+        }).map(user => {
           const userItems = items.filter(i => i.assignee_id === user.id);
           const currentTask = userItems.find(i => i.state === 'in_progress');
           const nextTasks = userItems
@@ -135,6 +142,9 @@ export default async function MyWorkPage() {
                 </div>
                 <div className="flex-1">
                   <h3 className="text-base font-semibold text-gray-900">{user.full_name}</h3>
+                    {user.id === currentUserId && (
+                      <span className="rounded-full bg-blue-100 text-blue-700 px-2 py-0.5 text-[10px] font-medium">Tu</span>
+                    )}
                   <p className="text-xs text-gray-500">{user.email}</p>
                 </div>
                 <div className="text-right">

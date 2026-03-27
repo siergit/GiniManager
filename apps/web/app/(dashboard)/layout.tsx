@@ -7,6 +7,7 @@ import GlobalSearch from './global-search';
 import { ThemeProvider } from './theme-provider';
 import { LocaleProvider } from './locale-provider';
 import KeyboardShortcuts from './keyboard-shortcuts';
+import MobileTimerFab from './mobile-timer-fab';
 import QuickNav from './quick-nav';
 import RealtimeProvider from './realtime-provider';
 import TimerWidget from './timer-widget';
@@ -46,6 +47,7 @@ export default async function DashboardLayout({
     </div>
       <RealtimeProvider />
       <KeyboardShortcuts />
+      <MobileTimerFab />
     </LocaleProvider>
     </ThemeProvider>
   );

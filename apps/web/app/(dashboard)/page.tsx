@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase-admin';
+import { getSession } from '@/lib/session';
 
 export const dynamic = 'force-dynamic';
 
@@ -117,6 +118,8 @@ export default async function DashboardPage() {
   const lastWeekMin = lastWeekEntries?.reduce((s, e) => s + (e.minutes || 0), 0) || 0;
   const weekChange = lastWeekMin > 0 ? Math.round(((thisWeekMin - lastWeekMin) / lastWeekMin) * 100) : 0;
 
+  const session = await getSession();
+
   const stats = [
     { label: 'Total Work Items', value: total.toString(), detail: `${items?.filter(i => i.item_type === 'task').length || 0} tasks` },
     { label: 'In Progress', value: inProgress.toString(), detail: `${backlog} in backlog · ${weekChange > 0 ? '+' : ''}${weekChange}% vs last week` },
@@ -136,6 +139,24 @@ export default async function DashboardPage() {
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
         <p className="mt-1 text-sm text-gray-500">Management overview - live data from Supabase</p>
       </div>
+
+      {/* Personal Quick Stats */}
+      {session && session.userId !== '00000000-0000-0000-0000-000000000001' && (() => {
+        const myItems = (items || []).filter(i => i.assignee_id === session.userId);
+        const myInProgress = myItems.filter(i => i.state === 'in_progress').length;
+        const myTotal = myItems.filter(i => !['done', 'cancelled', 'archived'].includes(i.state)).length;
+        const myOverdue = myItems.filter(i => i.due_date && i.due_date < today && !['done', 'cancelled', 'archived'].includes(i.state)).length;
+        return (
+          <div className="rounded-xl border-2 border-blue-200 bg-blue-50 p-4">
+            <p className="text-sm font-semibold text-blue-900">Olá {session.fullName.split(' ')[0]}!</p>
+            <div className="mt-2 flex gap-6 text-sm">
+              <span className="text-blue-700">{myInProgress} em progresso</span>
+              <span className="text-blue-700">{myTotal} pendentes</span>
+              {myOverdue > 0 && <span className="text-red-600 font-medium">{myOverdue} atrasadas</span>}
+            </div>
+          </div>
+        );
+      })()}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
