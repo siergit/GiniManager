@@ -94,9 +94,32 @@ export default async function DashboardPage() {
   const done = items?.filter(i => i.state === 'done').length || 0;
   const backlog = items?.filter(i => i.state === 'backlog').length || 0;
 
+  // Week-over-week comparison
+  const thisWeekStart = new Date();
+  thisWeekStart.setDate(thisWeekStart.getDate() - thisWeekStart.getDay() + 1); // Monday
+  const lastWeekStart = new Date(thisWeekStart);
+  lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+  const lastWeekEnd = new Date(thisWeekStart);
+  lastWeekEnd.setDate(lastWeekEnd.getDate() - 1);
+
+  const { data: thisWeekEntries } = await supabase
+    .from('time_entries')
+    .select('minutes')
+    .gte('date', thisWeekStart.toISOString().split('T')[0]);
+
+  const { data: lastWeekEntries } = await supabase
+    .from('time_entries')
+    .select('minutes')
+    .gte('date', lastWeekStart.toISOString().split('T')[0])
+    .lte('date', lastWeekEnd.toISOString().split('T')[0]);
+
+  const thisWeekMin = thisWeekEntries?.reduce((s, e) => s + (e.minutes || 0), 0) || 0;
+  const lastWeekMin = lastWeekEntries?.reduce((s, e) => s + (e.minutes || 0), 0) || 0;
+  const weekChange = lastWeekMin > 0 ? Math.round(((thisWeekMin - lastWeekMin) / lastWeekMin) * 100) : 0;
+
   const stats = [
     { label: 'Total Work Items', value: total.toString(), detail: `${items?.filter(i => i.item_type === 'task').length || 0} tasks` },
-    { label: 'In Progress', value: inProgress.toString(), detail: `${backlog} in backlog` },
+    { label: 'In Progress', value: inProgress.toString(), detail: `${backlog} in backlog · ${weekChange > 0 ? '+' : ''}${weekChange}% vs last week` },
     { label: 'Blocked', value: blocked.toString(), detail: blocked === 0 ? 'No blockers' : 'Needs attention' },
     { label: 'Done', value: done.toString(), detail: `${total > 0 ? Math.round(done / total * 100) : 0}% complete` },
   ];

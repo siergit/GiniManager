@@ -19,6 +19,7 @@ import TagsEditor from './tags-editor';
 import PrintButton from './print-button';
 import QuickSubtask from './quick-subtask';
 import MoveItem from './move-item';
+import ArchiveButton from './archive-button';
 
 export const dynamic = 'force-dynamic';
 
@@ -427,6 +428,7 @@ export default async function WorkItemDetailPage({
           <DeleteButton itemId={item.id} itemTitle={item.title} />
           <PrintButton />
           <MoveItem itemId={item.id} currentParentId={item.parent_id} itemType={item.item_type} />
+          <ArchiveButton itemId={item.id} isArchived={item.state === 'archived'} />
         </div>
       </div>
     </div>
