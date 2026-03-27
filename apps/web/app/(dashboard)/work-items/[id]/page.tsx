@@ -158,6 +158,7 @@ export default async function WorkItemDetailPage({
 
   // Calculate children stats
   const childrenCount = children?.length || 0;
+  const hasChildren = childrenCount > 0;
   const doneChildren = children?.filter((c: { state: string }) => c.state === 'done').length || 0;
   const inProgressChildren = children?.filter((c: { state: string }) => c.state === 'in_progress').length || 0;
   const blockedChildren = children?.filter((c: { state: string }) => c.state === 'blocked').length || 0;
@@ -222,10 +223,16 @@ export default async function WorkItemDetailPage({
         )}
       </div>
 
-      <div className="flex items-center gap-3">
-        <PlayButton workItemId={id} workItemTitle={item.title} size="md" showLabel />
-        <QuickTimeLog workItemId={id} users={(allUsers || []) as { id: string; full_name: string }[]} />
-      </div>
+      {!hasChildren ? (
+        <div className="flex items-center gap-3">
+          <PlayButton workItemId={id} workItemTitle={item.title} size="md" showLabel />
+          <QuickTimeLog workItemId={id} users={(allUsers || []) as { id: string; full_name: string }[]} />
+        </div>
+      ) : (
+        <div className="rounded-lg bg-gray-50 border border-gray-200 px-4 py-2 text-sm text-gray-500">
+          Σ Este item totaliza os tempos dos {childrenCount} sub-itens. Regista tempo directamente nos sub-itens.
+        </div>
+      )}
 
       <TimeEntriesSection workItemId={id} />
 
@@ -243,21 +250,28 @@ export default async function WorkItemDetailPage({
           />
         </div>
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <InlineEdit
-            itemId={id}
-            field="estimated_minutes"
-            value={item.estimated_minutes || 0}
-            type="number"
-            label="Estimated (min)"
-            displayValue={formatMinutes(item.estimated_minutes || 0)}
-          />
+          {hasChildren ? (
+            <>
+              <p className="text-xs text-gray-500 uppercase tracking-wide">Estimado <span className="text-blue-500" title="Totalizado dos sub-itens">Σ</span></p>
+              <p className="mt-1 text-sm font-medium text-gray-900">{formatMinutes(item.estimated_minutes || 0)}</p>
+            </>
+          ) : (
+            <InlineEdit
+              itemId={id}
+              field="estimated_minutes"
+              value={item.estimated_minutes || 0}
+              type="number"
+              label="Estimado (min)"
+              displayValue={formatMinutes(item.estimated_minutes || 0)}
+            />
+          )}
         </div>
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Actual</p>
+          <p className="text-xs text-gray-500 uppercase tracking-wide">Real {hasChildren && <span className="text-blue-500" title="Totalizado dos sub-itens">Σ</span>}</p>
           <p className="mt-1 text-sm font-medium text-gray-900">{formatMinutes(item.actual_minutes || 0)}</p>
         </div>
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
-          <p className="text-xs text-gray-500 uppercase tracking-wide">Remaining</p>
+          <p className="text-xs text-gray-500 uppercase tracking-wide">Restante {hasChildren && <span className="text-blue-500" title="Totalizado dos sub-itens">Σ</span>}</p>
           <p className="mt-1 text-sm font-medium text-gray-900">{formatMinutes(item.remaining_minutes || 0)}</p>
         </div>
         <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">

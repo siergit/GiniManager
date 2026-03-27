@@ -51,9 +51,19 @@ export async function PATCH(
     'progress_override', 'blocked_reason', 'sort_order', 'tags',
   ];
 
+  // Block editing time fields on items with children (totalized from children)
+  const { count: childCount } = await supabase
+    .from('work_items')
+    .select('*', { count: 'exact', head: true })
+    .eq('parent_id', id);
+
+  const hasChildren = (childCount || 0) > 0;
+  const blockedFields = hasChildren ? ['estimated_minutes', 'actual_minutes', 'remaining_minutes', 'progress_pct'] : [];
+
   const updates: Record<string, unknown> = {};
   for (const field of allowedFields) {
     if (field in body) {
+      if (blockedFields.includes(field)) continue; // Skip totalized fields
       updates[field] = body[field];
     }
   }
