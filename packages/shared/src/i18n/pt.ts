@@ -4,7 +4,7 @@ export const pt = {
   'nav.myWork': 'Painel Pessoal',
   'nav.workItems': 'Itens de Trabalho',
   'nav.timeTracking': 'Registo de Tempo',
-  'nav.team': 'Equipa',
+  'nav.team': 'Painel Equipa',
   'nav.calendar': 'Calendario',
   'nav.reports': 'Relatorios',
   'nav.notifications': 'Notificacoes',

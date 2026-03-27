@@ -76,12 +76,15 @@ export default async function MyWorkPage() {
     };
   });
 
-  // Sort: current user first
-  userData.sort((a, b) => {
-    if (a.isCurrentUser) return -1;
-    if (b.isCurrentUser) return 1;
-    return 0;
-  });
+  // Collaborators only see their own data, admin/manager see everyone
+  const isCollaborator = session?.role === 'collaborator';
+  const visibleUsers = isCollaborator
+    ? userData.filter(u => u.isCurrentUser)
+    : userData.sort((a, b) => {
+        if (a.isCurrentUser) return -1;
+        if (b.isCurrentUser) return 1;
+        return 0;
+      });
 
   // Items waiting on externals
   const { data: pendingDeps } = await supabase
@@ -97,7 +100,7 @@ export default async function MyWorkPage() {
         <p className="mt-1 text-sm text-gray-500">Clica ▶ para iniciar o timer numa tarefa</p>
       </div>
 
-      {userData.map(user => (
+      {visibleUsers.map(user => (
         <div key={user.id} className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
           {/* User Header */}
           <div className="flex items-center gap-3 px-4 py-3 bg-gray-50 border-b border-gray-100">
