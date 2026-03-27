@@ -7,7 +7,7 @@ export default async function DashboardPage() {
 
   const { data: items } = await supabase
     .from('work_items')
-    .select('id, title, state, priority, item_type, due_date, assignee_id');
+    .select('id, title, state, priority, item_type, due_date, assignee_id, parent_id');
 
   const { data: users } = await supabase
     .from('users')
@@ -205,6 +205,49 @@ export default async function DashboardPage() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+
+      {/* Area Progress Overview */}
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-gray-900">Progresso por Área</h2>
+        <div className="mt-4 space-y-4">
+          {(items || []).filter(i => i.item_type === 'area').map(area => {
+            // Get all descendants of this area
+            function getDescendants(parentId: string): typeof items {
+              const direct = (items || []).filter(i => i.parent_id === parentId);
+              let all = [...direct];
+              direct.forEach(d => { all = all.concat(getDescendants(d.id) || []); });
+              return all;
+            }
+
+            const descendants = getDescendants(area.id) || [];
+            const total = descendants.length;
+            const done = descendants.filter(d => d.state === 'done').length;
+            const inProg = descendants.filter(d => d.state === 'in_progress').length;
+            const blocked = descendants.filter(d => ['blocked', 'on_hold'].includes(d.state)).length;
+            const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+            return (
+              <div key={area.id}>
+                <div className="flex items-center justify-between mb-1">
+                  <a href={`/work-items/${area.id}`} className="text-sm font-medium text-gray-900 hover:text-blue-600">{area.title}</a>
+                  <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <span className="text-green-600">{done} done</span>
+                    <span className="text-yellow-600">{inProg} active</span>
+                    {blocked > 0 && <span className="text-red-600">{blocked} blocked</span>}
+                    <span className="font-medium text-gray-900">{pct}%</span>
+                  </div>
+                </div>
+                <div className="h-4 rounded-full bg-gray-100 overflow-hidden flex">
+                  <div className="h-full bg-green-500 transition-all" style={{ width: `${total > 0 ? (done / total) * 100 : 0}%` }} />
+                  <div className="h-full bg-yellow-400 transition-all" style={{ width: `${total > 0 ? (inProg / total) * 100 : 0}%` }} />
+                  <div className="h-full bg-red-400 transition-all" style={{ width: `${total > 0 ? (blocked / total) * 100 : 0}%` }} />
+                </div>
+                <div className="mt-0.5 text-[10px] text-gray-400">{total} items total</div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

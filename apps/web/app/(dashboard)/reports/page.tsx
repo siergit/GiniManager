@@ -1,6 +1,8 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { createAdminClient } from '@/lib/supabase-admin';
 import ExportCSV from './export-csv';
+import DateFilter from './date-filter';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +15,12 @@ function formatMinutes(min: number): string {
   return `${h}h ${m}m`;
 }
 
-export default async function ReportsPage() {
+export default async function ReportsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string; to?: string }>;
+}) {
+  const params = await searchParams;
   const supabase = createAdminClient();
 
   // Get all work items
@@ -27,13 +34,14 @@ export default async function ReportsPage() {
     .select('id, full_name')
     .eq('is_active', true);
 
-  // Get time entries (last 30 days)
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  // Get time entries (filtered by date range)
+  const fromDate = params.from || (() => { const d = new Date(); d.setDate(d.getDate() - 30); return d.toISOString().split('T')[0]; })();
+  const toDate = params.to || new Date().toISOString().split('T')[0];
   const { data: timeEntries } = await supabase
     .from('time_entries')
     .select('user_id, work_item_id, minutes, date')
-    .gte('date', thirtyDaysAgo.toISOString().split('T')[0]);
+    .gte('date', fromDate)
+    .lte('date', toDate);
 
   const allItems = items || [];
   const allEntries = timeEntries || [];
@@ -102,7 +110,14 @@ export default async function ReportsPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Reports</h1>
-        <p className="mt-1 text-sm text-gray-500">Last 30 days overview</p>
+        <p className="mt-1 text-sm text-gray-500">
+          {new Date(fromDate + 'T00:00:00').toLocaleDateString('pt-PT', { day: '2-digit', month: 'long' })} &mdash; {new Date(toDate + 'T00:00:00').toLocaleDateString('pt-PT', { day: '2-digit', month: 'long', year: 'numeric' })}
+        </p>
+        <div className="mt-2">
+          <Suspense fallback={null}>
+            <DateFilter />
+          </Suspense>
+        </div>
         <div className="mt-2 flex items-center gap-3">
           <Link href="/reports/weekly" className="inline-flex items-center gap-1 text-sm text-blue-600 hover:underline">
             Ver relatório semanal →
