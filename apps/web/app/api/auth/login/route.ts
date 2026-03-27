@@ -11,14 +11,36 @@ export async function POST(request: Request) {
     const { email } = await request.json();
 
     if (!email) {
-      return NextResponse.json({ error: 'Email required' }, { status: 400 });
+      return NextResponse.json({ error: 'Email obrigatório' }, { status: 400 });
     }
 
-    // Send magic link / OTP via Supabase Auth
+    // Check if user exists in our users table (admin must pre-create)
+    const adminClient = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    );
+    const { data: existingUser } = await adminClient
+      .from('users')
+      .select('id, is_active')
+      .eq('email', email.toLowerCase().trim())
+      .single();
+
+    if (!existingUser) {
+      return NextResponse.json(
+        { error: 'Utilizador não registado. Contacta o administrador.' },
+        { status: 401 }
+      );
+    }
+
+    if (!existingUser.is_active) {
+      return NextResponse.json({ error: 'Conta desativada.' }, { status: 401 });
+    }
+
+    // Send OTP code via Supabase Auth
     const { error } = await supabase.auth.signInWithOtp({
-      email,
+      email: email.toLowerCase().trim(),
       options: {
-        shouldCreateUser: true, // Allow team members to sign up via OTP
+        shouldCreateUser: true,
       },
     });
 
@@ -26,8 +48,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 401 });
     }
 
-    return NextResponse.json({ message: 'OTP sent' });
+    return NextResponse.json({ message: 'Código enviado para o teu email' });
   } catch {
-    return NextResponse.json({ error: 'Internal error' }, { status: 500 });
+    return NextResponse.json({ error: 'Erro interno' }, { status: 500 });
   }
 }

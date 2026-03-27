@@ -9,12 +9,8 @@ export async function POST(request: Request) {
   const supabase = createAdminClient();
   const body = await request.json();
 
-  if (!body.full_name || !body.email || !body.pin) {
-    return NextResponse.json({ error: 'Nome, email e PIN obrigatórios' }, { status: 400 });
-  }
-
-  if (body.pin.length !== 8 || !/^\d{8}$/.test(body.pin)) {
-    return NextResponse.json({ error: 'PIN deve ter 8 dígitos numéricos' }, { status: 400 });
+  if (!body.full_name || !body.email) {
+    return NextResponse.json({ error: 'Nome e email obrigatórios' }, { status: 400 });
   }
 
   // Check if email exists
@@ -35,7 +31,6 @@ export async function POST(request: Request) {
       email: body.email.toLowerCase().trim(),
       full_name: body.full_name.trim(),
       role: body.role || 'collaborator',
-      pin_hash: body.pin,
       is_active: true,
     })
     .select()
@@ -57,12 +52,6 @@ export async function PATCH(request: Request) {
   }
 
   const updates: Record<string, unknown> = {};
-  if ('pin' in body) {
-    if (body.pin.length !== 8 || !/^\d{8}$/.test(body.pin)) {
-      return NextResponse.json({ error: 'PIN deve ter 8 dígitos' }, { status: 400 });
-    }
-    updates.pin_hash = body.pin;
-  }
   if ('is_active' in body) updates.is_active = body.is_active;
   if ('role' in body) updates.role = body.role;
   if ('full_name' in body) updates.full_name = body.full_name;
