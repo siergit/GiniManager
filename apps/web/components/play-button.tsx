@@ -3,7 +3,12 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const DEFAULT_USER_ID = '00000000-0000-0000-0000-000000000002';
+function getSelectedUserId(): string {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('gini-timer-user') || '00000000-0000-0000-0000-000000000002';
+  }
+  return '00000000-0000-0000-0000-000000000002';
+}
 
 interface Props {
   workItemId: string;
@@ -24,7 +29,7 @@ export default function PlayButton({ workItemId, workItemTitle, size = 'sm', sho
       const res = await fetch('/api/timer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ user_id: DEFAULT_USER_ID, work_item_id: workItemId }),
+        body: JSON.stringify({ user_id: getSelectedUserId(), work_item_id: workItemId }),
       });
 
       if (!res.ok) {

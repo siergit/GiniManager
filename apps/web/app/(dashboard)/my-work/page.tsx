@@ -81,6 +81,33 @@ export default async function MyWorkPage() {
     if (e.work_item_id) activeByUser[e.user_id] = e.work_item_id;
   });
 
+  // Get work item titles for today's entries
+  const todayWorkItemIds = [...new Set((todayEntries || []).map(e => e.work_item_id).filter(Boolean))];
+  let todayWorkItems: Record<string, string> = {};
+  if (todayWorkItemIds.length > 0) {
+    const { data: wis } = await supabase
+      .from('work_items')
+      .select('id, title')
+      .in('id', todayWorkItemIds);
+    if (wis) todayWorkItems = Object.fromEntries(wis.map(w => [w.id, w.title]));
+  }
+
+  // Group today entries by user and work item
+  const todayBreakdownByUser: Record<string, { workItemId: string; title: string; minutes: number }[]> = {};
+  (todayEntries || []).forEach(e => {
+    if (!todayBreakdownByUser[e.user_id]) todayBreakdownByUser[e.user_id] = [];
+    const existing = todayBreakdownByUser[e.user_id].find(b => b.workItemId === e.work_item_id);
+    if (existing) {
+      existing.minutes += e.minutes || 0;
+    } else {
+      todayBreakdownByUser[e.user_id].push({
+        workItemId: e.work_item_id,
+        title: todayWorkItems[e.work_item_id] || 'Unknown',
+        minutes: e.minutes || 0,
+      });
+    }
+  });
+
   return (
     <div className="space-y-6">
       <div>
@@ -135,6 +162,26 @@ export default async function MyWorkPage() {
                     <p className="text-sm text-gray-400 italic">Sem tarefa em progresso</p>
                   )}
                 </div>
+
+                {/* Today's Time */}
+                {todayBreakdownByUser[user.id] && todayBreakdownByUser[user.id].length > 0 && (
+                  <div>
+                    <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Hoje registou</p>
+                    <div className="space-y-1">
+                      {todayBreakdownByUser[user.id].sort((a, b) => b.minutes - a.minutes).map((entry, i) => (
+                        <div key={i} className="flex items-center gap-2 text-sm">
+                          <div className="w-16 h-1.5 rounded-full bg-gray-200 overflow-hidden">
+                            <div className="h-full rounded-full bg-blue-500" style={{ width: `${Math.min(100, (entry.minutes / 480) * 100)}%` }} />
+                          </div>
+                          <span className="text-xs font-medium text-gray-900 w-10">{formatMinutes(entry.minutes)}</span>
+                          <Link href={`/work-items/${entry.workItemId}`} className="text-xs text-blue-600 hover:underline truncate">
+                            {entry.title}
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Blocked */}
                 {blockedTasks.length > 0 && (
